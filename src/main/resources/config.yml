@@ -1,0 +1,14 @@
+### The id of this server used to identify servers to accept/transfer from; must follow the regex pattern: `^[a-z0-9_]+$`
+server_id: ""
+
+### The secret of your transfers, as sha256; all servers must have an identical secret.
+### You can generate sha256 here: https://emn178.github.io/online-tools/sha256.html
+secret_sha256: ""
+
+### Whether to hide the 'Player joined the game' and 'Player left the game' when transferring.
+hide_join_leave_messages: true
+
+### A list of server_id this server accepts.
+accepts:
+# - development
+# - build_sever

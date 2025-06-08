@@ -1,0 +1,6 @@
+name: Transferrer
+version: ${version}
+description: ${description}
+main: me.hapyl.transferrer.Transferrer
+author: "hapyl"
+api-version: '1.21'
