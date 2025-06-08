@@ -16,12 +16,22 @@ public enum KickReason implements Labelled {
     /**
      * The 'server_id' from sending server does not match this server's id.
      */
-    WRONG_SERVER_TO,
+    SERVER_ID_MISMATCH,
     
     /**
      * This server does not allow transfers from the sending server.
      */
-    DOES_NOT_ACCEPT_SERVER;
+    SERVER_DID_NOT_ACCEPT,
+    
+    /**
+     * The transfer was not made through the API.
+     */
+    NON_API_TRANSFER,
+    
+    /**
+     * An unknown exception has occurred.
+     */
+    EXCEPTION;
     
     @Override
     @Nonnull

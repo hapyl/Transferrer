@@ -1,9 +1,7 @@
 package me.hapyl.transferrer.util;
 
-import me.hapyl.transferrer.exception.InvalidTransferPayloadException;
-
 import javax.annotation.Nonnull;
-import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import java.util.function.Function;
 
 public interface ObjectToBytesConverter<T> {
@@ -13,13 +11,13 @@ public interface ObjectToBytesConverter<T> {
     @Nonnull
     T asObject(@Nonnull byte[] bytes);
     
-    @Nonnull
-    default T asObject(@Nonnull byte[] bytes, @Nonnull InvalidTransferPayloadException.Cause cause) {
+    @Nullable
+    default T asObjectOrNull(@Nonnull byte[] bytes) {
         try {
             return asObject(bytes);
         }
         catch (Exception e) {
-            throw new InvalidTransferPayloadException(cause);
+            return null;
         }
     }
     

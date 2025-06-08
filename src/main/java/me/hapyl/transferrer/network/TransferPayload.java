@@ -1,6 +1,5 @@
 package me.hapyl.transferrer.network;
 
-import me.hapyl.transferrer.exception.InvalidTransferPayloadException;
 import me.hapyl.transferrer.util.NullableByteArray2;
 import me.hapyl.transferrer.util.ObjectToBytesConverter;
 import me.hapyl.transferrer.util.ServerId;
@@ -71,21 +70,17 @@ public final class TransferPayload {
                             final byte[] serverFromCookie = array.byte1();
                             final byte[] serverToCookie = array.byte2();
                             
-                            if (serverFromCookie == null || serverFromCookie.length == 0) {
-                                throw new InvalidTransferPayloadException(InvalidTransferPayloadException.Cause.ILLEGAL_SERVER_FROM);
+                            if (serverFromCookie == null || serverFromCookie.length == 0 || serverToCookie == null || serverToCookie.length == 0 || secretCookie == null || secretCookie.length == 0) {
+                                return null;
                             }
                             
-                            if (serverToCookie == null || serverToCookie.length == 0) {
-                                throw new InvalidTransferPayloadException(InvalidTransferPayloadException.Cause.ILLEGAL_SERVER_TO);
-                            }
+                            final ServerId serverFromId = converterServerId.asObjectOrNull(serverFromCookie);
+                            final ServerId serverToId = converterServerId.asObjectOrNull(serverToCookie);
+                            final Sha256 secret = converterSecret.asObjectOrNull(secretCookie);
                             
-                            if (secretCookie == null || secretCookie.length == 0) {
-                                throw new InvalidTransferPayloadException(InvalidTransferPayloadException.Cause.MALFORMED_SECRET);
+                            if (serverFromId == null || serverToId == null || secret == null) {
+                                return null;
                             }
-                            
-                            final ServerId serverFromId = converterServerId.asObject(serverFromCookie, InvalidTransferPayloadException.Cause.MALFORMED_SERVER_FROM);
-                            final ServerId serverToId = converterServerId.asObject(serverToCookie, InvalidTransferPayloadException.Cause.MALFORMED_SERVER_TO);
-                            final Sha256 secret = converterSecret.asObject(secretCookie, InvalidTransferPayloadException.Cause.MALFORMED_SECRET);
                             
                             return new TransferPayload(serverFromId, serverToId, secret);
                         }

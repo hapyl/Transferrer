@@ -8,7 +8,5 @@ secret_sha256: ""
 ### Whether to hide the 'Player joined the game' and 'Player left the game' when transferring.
 hide_join_leave_messages: true
 
-### A list of server_id this server accepts.
-accepts:
-# - development
-# - build_sever
+### A list of server_id this server accepts transfers from; "*" to accept all servers.
+accepts: [ "*" ]
