@@ -16,11 +16,14 @@ import java.util.function.Function;
 @ApiStatus.Internal
 public class TransferrerConfigImpl implements TransferrerConfig {
     
+    private static final String acceptAllServersWildcard = "*";
+    
     @Nonnull private final ServerId serverId;
     @Nonnull private final Sha256 secret;
+    
     private final boolean hideJoinLeaveMessages;
     
-    @Nullable private final List<ServerId> accepts; // null means we DON'T accept transfers!
+    @Nullable private final List<ServerId> accepts; // Null means accept all
     
     public TransferrerConfigImpl(@Nonnull Transferrer main) {
         main.reloadConfig();
@@ -60,8 +63,8 @@ public class TransferrerConfigImpl implements TransferrerConfig {
         
         this.accepts = fetchConfigValue(
                 config, "accepts", FileConfiguration::getStringList, accepts -> {
-                    if (accepts.isEmpty()) {
-                        return null; // Null is fine since it's a better check than isEmpty()
+                    if (accepts.contains(acceptAllServersWildcard)) {
+                        return null; // null means we accept any servers
                     }
                     
                     return accepts.stream()
@@ -89,12 +92,12 @@ public class TransferrerConfigImpl implements TransferrerConfig {
     
     @Override
     public boolean acceptsAny() {
-        return accepts != null;
+        return accepts == null;
     }
     
     @Override
     public boolean accepts(@Nonnull ServerId id) {
-        return accepts != null && accepts.contains(id);
+        return accepts == null || accepts.contains(id);
     }
     
     private static <S, T> T fetchConfigValue(FileConfiguration config, String key, BiFunction<FileConfiguration, String, S> getFn, Function<S, T> fn) {
