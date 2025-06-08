@@ -6,7 +6,6 @@ import me.hapyl.transferrer.config.TransferrerConfig;
 import me.hapyl.transferrer.config.TransferrerConfigImpl;
 import me.hapyl.transferrer.event.PlayerTransferReceiveEvent;
 import me.hapyl.transferrer.event.PlayerTransferSendEvent;
-import me.hapyl.transferrer.exception.InvalidTransferPayloadException;
 import me.hapyl.transferrer.util.Labelled;
 import me.hapyl.transferrer.util.Message;
 import me.hapyl.transferrer.util.ServerId;
@@ -99,8 +98,10 @@ public final class TransferHandler implements TransferrerAPI, Listener {
         
         TransferPayload.retrieve(player)
                        .thenAcceptAsync(payload -> {
+                           // Not payload usually means we're transferred via non-api or /transfer
                            if (payload == null) {
-                               return; // Another plugin transfer
+                               kickInvalidPayload(player, KickReason.NON_API_TRANSFER);
+                               return;
                            }
                            
                            // Validate server_to is this server
@@ -109,13 +110,13 @@ public final class TransferHandler implements TransferrerAPI, Listener {
                            final Sha256 secret = payload.secret();
                            
                            if (!config.serverId().equals(serverTo)) {
-                               kickInvalidPayload(player, KickReason.WRONG_SERVER_TO);
+                               kickInvalidPayload(player, KickReason.SERVER_ID_MISMATCH);
                                return;
                            }
                            
                            // Validate server is acceptable
                            if (!config.accepts(serverFrom)) {
-                               kickInvalidPayload(player, KickReason.DOES_NOT_ACCEPT_SERVER);
+                               kickInvalidPayload(player, KickReason.SERVER_DID_NOT_ACCEPT);
                                return;
                            }
                            
@@ -129,26 +130,11 @@ public final class TransferHandler implements TransferrerAPI, Listener {
                            new PlayerTransferReceiveEvent(player, serverFrom, serverTo).callEvent();
                        })
                        .exceptionally(ex -> {
-                           if (!(ex.getCause() instanceof InvalidTransferPayloadException exception)) {
-                               return null;
-                           }
+                           // The code handles all exceptions and returns a 'null' future, this is just a fail-sail
+                           kickInvalidPayload(player, KickReason.EXCEPTION);
                            
-                           final InvalidTransferPayloadException.Cause cause = exception.cause();
-                           
-                           // When exception is thrown, it's probably due to malformed or illegal cookies,
-                           // meaning it's most likely not plugin's fault, so log it ig
-                           transferrer.getLogger().warning(
-                                   """
-                                   Kicked %s because of invalid transfer payload: %s.
-                                   
-                                   It's likely that it isn't a plugin-related issue and player is trying to 'hack' the server.""".formatted(
-                                           player.getName(),
-                                           cause
-                                   ));
-                           
-                           
-                           kickInvalidPayload(player, cause);
-                           return null;
+                           // Throw runtime exception for debug/bug-reports
+                           throw new RuntimeException(ex);
                        });
     }
     
@@ -186,7 +172,7 @@ public final class TransferHandler implements TransferrerAPI, Listener {
     private <E extends Enum<E> & Labelled> void kickInvalidPayload(Player player, E invalidSecret) {
         sync(() -> player.kick(
                 Component.text()
-                         .append(Component.text("Illegal transfer!", NamedTextColor.DARK_RED, TextDecoration.BOLD))
+                         .append(Component.text("Error joining server!", NamedTextColor.DARK_RED, TextDecoration.BOLD))
                          .appendNewline()
                          .appendNewline()
                          .append(Component.text("An error has occurred during transfer:", NamedTextColor.RED))
