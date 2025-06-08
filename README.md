@@ -26,6 +26,7 @@ Allows for secure transferring between Minecraft servers with the API.
     <version>LATEST_VERSION</version>
 </dependency>
 ```
+[![](https://jitpack.io/v/hapyl/Transferrer.svg)](https://jitpack.io/#hapyl/Transferrer)
 
 2. Download the [latest](https://github.com/hapyl/Transferrer/releases/latest) release and put it in all of your servers' /plugins folder.
 3. Set `accepts-transfers` to `true` in your `server.properties`.
