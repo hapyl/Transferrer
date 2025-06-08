@@ -49,6 +49,6 @@ Transferrer.getAPI().transfer(player, development);
 <br>
 
 ```minecraft
-/transferrer development localhost 33333
+/transferrer goto development localhost 33333
 ```
 > The equivalent using the command. *(Not recommended)*
